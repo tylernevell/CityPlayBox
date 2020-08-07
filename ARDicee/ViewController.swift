@@ -17,17 +17,42 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //allows to find feature points
+        self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
         // Set the view's delegate
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+//        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
+//
+//        let material = SCNMaterial()
+//
+//        material.diffuse.contents = UIColor.red
+//
+//        cube.materials = [material]
+//
+//        let node = SCNNode()
+//
+//        node.position = SCNVector3(0, 0.1, -0.5)
+//        node.geometry = cube
+//
+//        sceneView.scene.rootNode.addChildNode(node)
+        sceneView.autoenablesDefaultLighting = true
         
-        // Set the scene to the view
-        sceneView.scene = scene
+//        // Create a new scene
+//        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+//
+//        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+//
+//            diceNode.position = SCNVector3(0.0, 0.0, -0.1)
+//
+//            sceneView.scene.rootNode.addChildNode(diceNode)
+//
+//        }
+//        // Set the scene to the view
+//        sceneView.scene = scene
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,7 +60,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        configuration.planeDetection = .horizontal
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -46,30 +72,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
-
-    // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
-        
-    }
-    
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
+    // tells delegate(current view controller) that a scenekit node corresponding to a new AR ahcnor has been
+    // added to the scene. We will anchor objects to this AR anchor
+    // when a new horizontal plane is detected, this function will be called
+    // Can use for placing buildings and structures
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        if anchor is ARPlaneAnchor {
+            
+            // downcast anchor into the type ARPlanceAnchor
+            let planeAnchor = anchor as! ARPlaneAnchor
+            
+            let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: planeAnchor.extent.z)
+            
+        } else {
+            return
+        }
     }
 }
