@@ -14,6 +14,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    // array of the buildings. Allows us to undo last building placement
+    var cityObjectArray = [SCNNode]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -48,6 +51,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        sceneView.scene = scene
     }
     
+    @IBAction func addCityObject(_ sender: UIBarButtonItem) {
+    }
+    
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -75,7 +82,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // the touch occurs in sceneView, so pass that in
             let touchLocation = touch.location(in: sceneView)
             
-            //convert touchLocation into a 3d location using hitTest
+            // convert touchLocation into a 3d location using hitTest
             // searches for real world objects/ar anchors corresponding to in
             // the SceneKit view
             let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent) // types: passing in a point in 3D space
@@ -95,8 +102,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     // use hitResult coordinates in SCNVector3 to place Dice onto the grid
                     // add the raidus of the dice onto the y coordinate in order to make the dice sit on top of grid
                     diceNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius, hitResult.worldTransform.columns.3.z)
+                    
+                    // Add the object to the cityObjectArray
+                    cityObjectArray.append(diceNode)
         
                     sceneView.scene.rootNode.addChildNode(diceNode)
+                    
+                    
         
                 }
             }
