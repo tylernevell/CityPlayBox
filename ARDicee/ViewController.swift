@@ -83,7 +83,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // downcast anchor into the type ARPlanceAnchor
             let planeAnchor = anchor as! ARPlaneAnchor
             
-            let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: planeAnchor.extent.z)
+            // use the planeAnchor's dimensions to measure out size of plane
+            let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+            
+            // create the node for the plane and give its position
+            let planeNode = SCNNode()
+            planeNode.position = SCNVector3(x: planeAnchor.center.x, y: 0.0, z: planeAnchor.center.z)
+            
+            // transform and rotate planeNode to make horizontal
+            // angle measured in radians, counterclockwise.
+            planeNode.transform = SCNMatrix4MakeRotation(-Float.pi/2, 1.0, 0.0, 0.0)
+            planeNode.geometry = plane
+
+            // lets build a grid
+            let gridMaterial = SCNMaterial()
+            // import grid image into gridMaterial to make it usable
+            gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+            // apply gridMaterial texture to plane
+            plane.materials = [gridMaterial]
+            
+            // add planeNode onto the scene
+            node.addChildNode(planeNode)
             
         } else {
             return
