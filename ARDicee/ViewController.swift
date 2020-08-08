@@ -42,15 +42,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoenablesDefaultLighting = true
         
 //        // Create a new scene
-//        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
 //
-//        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
-//
-//            diceNode.position = SCNVector3(0.0, 0.0, -0.1)
-//
-//            sceneView.scene.rootNode.addChildNode(diceNode)
-//
-//        }
+
 //        // Set the scene to the view
 //        sceneView.scene = scene
     }
@@ -72,6 +65,44 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
+    
+    
+    // where we'll be recieving touches from the user. Use ARKit to convert touches
+    // to real world location
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            // in: is where the location was detected
+            // the touch occurs in sceneView, so pass that in
+            let touchLocation = touch.location(in: sceneView)
+            
+            //convert touchLocation into a 3d location using hitTest
+            // searches for real world objects/ar anchors corresponding to in
+            // the SceneKit view
+            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent) // types: passing in a point in 3D space
+            
+            // if we didnt get a result back, we didnt hit an existing plane
+            
+            // check if there was a hitTest result that came back and and first result isn't nill
+            if let hitResult = results.first {
+                // uncomment this out to see how coordinates gathered for diceNode.position vectors
+                // print(hitResult)
+                
+                // create new Dice scene
+                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                
+                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+                    
+                    // use hitResult coordinates in SCNVector3 to place Dice onto the grid
+                    // add the raidus of the dice onto the y coordinate in order to make the dice sit on top of grid
+                    diceNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius, hitResult.worldTransform.columns.3.z)
+        
+                    sceneView.scene.rootNode.addChildNode(diceNode)
+        
+                }
+            }
+        }
+    }
+    
     
     // tells delegate(current view controller) that a scenekit node corresponding to a new AR ahcnor has been
     // added to the scene. We will anchor objects to this AR anchor
