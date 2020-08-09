@@ -10,12 +10,12 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate, MenuViewControllerDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
     var objectsBrain = ObjectsBrain()
-    
+    var menuViewController = MenuViewController()
     // default to Tram object so app wont crash if we miss the mark
     var userSelectedObject = "Tram.scn"
     
@@ -38,7 +38,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
-        
+        menuViewController.delegate = self
 
         sceneView.autoenablesDefaultLighting = true
         
@@ -47,6 +47,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
 //        // Set the scene to the view
 //        sceneView.scene = scene
+    }
+    
+    // holy crap, i did it
+    func passAlongString(data: String) {
+        selectedObjectString = data
     }
     
     @IBAction func addCityObject(_ sender: UIBarButtonItem) {
@@ -104,9 +109,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pass the selected object to the new view controller.
         if segue.identifier == "goToMenu" {
             let destinationVC = segue.destination as! MenuViewController
+            destinationVC.delegate = self
             // if the string being passed back from MenuVC
             destinationVC.selectedObjectString = selectedObjectString
-                
             print(destinationVC.selectedObjectString!)
             
             
