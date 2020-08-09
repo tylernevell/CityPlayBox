@@ -16,6 +16,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // array of the buildings. Allows us to undo last building placement
     var cityObjectArray = [SCNNode]()
+    var planeArray = [SCNNode]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,20 +29,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-//        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
-//
-//        let material = SCNMaterial()
-//
-//        material.diffuse.contents = UIColor.red
-//
-//        cube.materials = [material]
-//
-//        let node = SCNNode()
-//
-//        node.position = SCNVector3(0, 0.1, -0.5)
-//        node.geometry = cube
-//
-//        sceneView.scene.rootNode.addChildNode(node)
+
         sceneView.autoenablesDefaultLighting = true
         
 //        // Create a new scene
@@ -52,8 +40,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     @IBAction func addCityObject(_ sender: UIBarButtonItem) {
+        self.performSegue(withIdentifier: "goToMenu", sender: self)
     }
     
+    // if user wants to remove the grid and place one in a new spot, they press
+    // New Grid and activate this function
+    @IBAction func removeGrid(_ sender: UIBarButtonItem) {
+        // if the array is occupied with planeNodes
+        if !planeArray.isEmpty {
+            // iterate through array and remove each node from the parent
+            // node and scene
+            for plane in planeArray {
+                plane.removeFromParentNode()
+            }
+            // empty the array
+            planeArray.removeAll()
+        }
+    }
+    
+    // if user wants to undo the last action of adding a new city object,
+    // they press undo
+    @IBAction func undoAddCityObject(_ sender: UIBarButtonItem) {
+        // won't pass through this logic gate without an object available to
+        // assign to cityObject
+        if let cityObject = cityObjectArray.last {
+            // remove node from parent node and subsequently the scene
+            cityObject.removeFromParentNode()
+            cityObjectArray.removeLast()
+        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -71,6 +86,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using [segue destinationViewController].
+        // Pass the selected object to the new view controller.
+        if segue.identifier == "goToMenu" {
+            let destinationVC = segue.destination as! MenuViewController
+            if destinationVC.objectSelection != nil {
+                
+            }
+        }
     }
     
     
@@ -92,21 +119,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // check if there was a hitTest result that came back and and first result isn't nill
             if let hitResult = results.first {
                 // uncomment this out to see how coordinates gathered for diceNode.position vectors
-                // print(hitResult)
+                print(hitResult)
                 
-                // create new Dice scene
-                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                // create new city object scene
+                let cityObjectScene = SCNScene(named: "art.scnassets/tram.scn")!
                 
-                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+                if let cityObjectNode = cityObjectScene.rootNode.childNode(withName: "Tram", recursively: true) {
                     
                     // use hitResult coordinates in SCNVector3 to place Dice onto the grid
                     // add the raidus of the dice onto the y coordinate in order to make the dice sit on top of grid
-                    diceNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius, hitResult.worldTransform.columns.3.z)
+                    cityObjectNode.position = SCNVector3(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y, hitResult.worldTransform.columns.3.z)
                     
                     // Add the object to the cityObjectArray
-                    cityObjectArray.append(diceNode)
-        
-                    sceneView.scene.rootNode.addChildNode(diceNode)
+                    cityObjectArray.append(cityObjectNode)
+                    
+                    sceneView.scene.rootNode.addChildNode(cityObjectNode)
                     
                     
         
@@ -121,7 +148,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // when a new horizontal plane is detected, this function will be called
     // Can use for placing buildings and structures
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        if anchor is ARPlaneAnchor {
+        if anchor is ARPlaneAnchor && planeArray.isEmpty {
             
             // downcast anchor into the type ARPlanceAnchor
             let planeAnchor = anchor as! ARPlaneAnchor
@@ -148,8 +175,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // add planeNode onto the scene
             node.addChildNode(planeNode)
             
+            planeArray.append(planeNode)
+            
         } else {
             return
         }
     }
 }
+
+
+
+
+//        let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
+//
+//        let material = SCNMaterial()
+//
+//        material.diffuse.contents = UIColor.red
+//
+//        cube.materials = [material]
+//
+//        let node = SCNNode()
+//
+//        node.position = SCNVector3(0, 0.1, -0.5)
+//        node.geometry = cube
+//
+//        sceneView.scene.rootNode.addChildNode(node)
