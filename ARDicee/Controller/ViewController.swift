@@ -14,6 +14,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var objectsBrain = ObjectsBrain()
+    
+    // default to Tram object so app wont crash if we miss the mark
+    var userSelectedObject = "Tram.scn"
+    
+    // it's 330am and I'm too tired to find a proper fix for the bug that this can bring about
+    // so just using most common name for objects to give me the best chance and please forgive variable naming conventions lol
+    var withNameString = "Box197"
+    var selectedObjectString = "Home"
+    
     // array of the buildings. Allows us to undo last building placement
     var cityObjectArray = [SCNNode]()
     var planeArray = [SCNNode]()
@@ -94,9 +104,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pass the selected object to the new view controller.
         if segue.identifier == "goToMenu" {
             let destinationVC = segue.destination as! MenuViewController
-            if destinationVC.selectedObjectString != nil {
+            // if the string being passed back from MenuVC
+            destinationVC.selectedObjectString = selectedObjectString
                 
-            }
+            print(destinationVC.selectedObjectString!)
+            
+            
         }
     }
     
@@ -119,12 +132,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // check if there was a hitTest result that came back and and first result isn't nill
             if let hitResult = results.first {
                 // uncomment this out to see how coordinates gathered for diceNode.position vectors
-                print(hitResult)
-                
+                // print(hitResult)
+                userSelectedObject = objectsBrain.get_objectFileName(selectedObjectString)
+                withNameString = objectsBrain.get_theName(selectedObjectString)
                 // create new city object scene
-                let cityObjectScene = SCNScene(named: "art.scnassets/tram.scn")!
+                let cityObjectScene = SCNScene(named: "art.scnassets/" + userSelectedObject)!
                 
-                if let cityObjectNode = cityObjectScene.rootNode.childNode(withName: "Tram", recursively: true) {
+                if let cityObjectNode = cityObjectScene.rootNode.childNode(withName: withNameString, recursively: true) {
                     
                     // use hitResult coordinates in SCNVector3 to place Dice onto the grid
                     // add the raidus of the dice onto the y coordinate in order to make the dice sit on top of grid
