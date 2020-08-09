@@ -22,7 +22,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.viewDidLoad()
         
         //allows to find feature points
-        self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
+        // self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
         // Set the view's delegate
         sceneView.delegate = self
         
@@ -94,7 +94,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pass the selected object to the new view controller.
         if segue.identifier == "goToMenu" {
             let destinationVC = segue.destination as! MenuViewController
-            if destinationVC.objectSelection != nil {
+            if destinationVC.selectedObjectString != nil {
                 
             }
         }
